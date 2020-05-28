@@ -11,21 +11,22 @@ mydb = myclient["Netflix"]
 #print(myclient.list_database_names())
 
 
-
-def movieInfoRedis():
+def movieInfoRedis(title):
     '''
     mycol = mydb["titles"]
     #pensar parametros
     for x in mycol.find({},{ "_id": 0, "title": 1, "duration": 1, "type":1 }):
     print(x)'''
     #si no esta llamas movieInfoMongo
+    movieInfoMongo(title)
 
 
 #PARAM QUE QUIERES SABER
-def movieInfoMongo():
+def movieInfoMongo(title):
     mycol = mydb["titles"]
     #pensar parametros
-    for x in mycol.find({},{ "_id": 0, "title": 1, "duration": 1, "type":1 }):
+    print(title)
+    for x in mycol.find({"title": str(title)},{  "_id": 0, "title": 1,"description":1, "duration": 1, "type":1 , "rating": 1, "listed_in":1 }):
         print(x)
     #escribir los resultados a redis
 
@@ -129,31 +130,4 @@ def generoInfoMongo(genero):
 
 #Aqui va el menu
 
-movieInfoMongo()
 
-'''
-def showsPorTempsRedis(serie):
-
-
-def showsPorTempsMongo(serie):
-
-
-
-def tvInfoRedis():
-    mycol = mydb["titles"]
-    #pensar parametros
-    for x in mycol.find({},{ "_id": 0, "title": 1, "duration": 1, "type":1 }):
-    print(x)
-    #si no esta llamas movieInfoMongo
-
-
-#PARAM QUE QUIERES SABER
-def tvInfoMongo():
-    mycol = mydb["titles"]
-    #pensar parametros
-    for x in mycol.find({},{ "_id": 0, "title": 1, "duration": 1, "type":1 }):
-        print(x)
-    #escribir los resultados a redis
-
-
-'''

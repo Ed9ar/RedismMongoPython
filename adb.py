@@ -213,6 +213,20 @@ def ratingInfoMongo(bajoOalto, cuantos):
     for x in mycol.find({},{ "_id": 0, "title": 1, "duration": 1, "type":1 }):
         print(x)
     #escribir los resultados a redis
+    '''
+    db.title.aggregate([
+    {
+        $match:{
+            "title":/Norm of the North: King Sized Adventure/
+        }
+    },{
+        $project:{
+            _id:0,
+            rating:1
+        }
+    }
+    ]); 
+    '''
 
 def generoInfoRedis():
     '''

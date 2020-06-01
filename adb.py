@@ -6,7 +6,7 @@ from pprint import pprint
 myclient = MongoClient("mongodb://localhost:27017/")
 
 #mydb = myclient["mydatabase"]
-mydb = myclient["Netflix"]
+mydb = myclient["netflix"]
 #print(myclient.list_database_names())
 
 
@@ -29,6 +29,26 @@ def movieInfoMongo(title):
         pprint(x)
         print()
     #escribir los resultados a redis
+    '''
+    db.title.aggregate([
+    {
+        $lookup:{
+            from:"filming",
+            localField:"show_id",
+            foreignField:"show_id",
+            as: "year_info"
+        }
+    },{
+        $match:{
+            "title":"Jandino: Whatever it Takes"
+        }
+    },{
+        $project:{
+            _id:0
+        }
+    }
+    ]);
+    '''
 
 def actorInfoRedis():
     return
@@ -44,6 +64,26 @@ def actorInfoMongo(nombreActor):
     return
     #regresar pelis en que ha estado
     #escribir los resultados a redis
+    '''
+    db.filming.aggregate([
+    {
+        $lookup:{
+            from:"title",
+            localField:"show_id",
+            foreignField:"show_id",
+            as: "year_info"
+        }
+    },{
+        $match:{
+                cast:/Jandino Asporaat/
+        }
+    },{
+        $project:{
+            _id:0,
+            title:"$year_info.title"
+        }
+    }
+    ]);'''
 
 def directorInfoRedis():
     return
@@ -62,6 +102,27 @@ def directorInfoMongo(nombreDirector):
     for x in mycol.find({},{ "_id": 0, "title": 1, "duration": 1, "type":1 }):
         print(x)
     #escribir los resultados a redis
+    '''
+    db.filming.aggregate([
+    {
+        $lookup:{
+            from:"title",
+            localField:"show_id",
+            foreignField:"show_id",
+            as: "director_info"
+        }
+    },{
+        $match:{
+                director:/Tilak Shetty/
+        }
+    },{
+        $project:{
+            _id:0,
+            title:"$director_info.title"
+        }
+    }
+    ]);
+    '''
 
 def anioInfoRedis():
     '''
@@ -78,6 +139,27 @@ def anioInfoMongo(anio):
     for x in mycol.find({},{ "_id": 0, "title": 1, "duration": 1, "type":1 }):
         print(x)
     #escribir los resultados a redis
+    '''
+    db.filming.aggregate([
+    {
+        $lookup:{
+            from:"title",
+            localField:"show_id",
+            foreignField:"show_id",
+            as: "release_year_info"
+        }
+    },{
+        $match:{
+                release_year:/2016/
+        }
+    },{
+        $project:{
+            _id:0,
+            title:"$release_year_info.title"
+        }
+    }
+    ]); 
+    '''
 
 def paisInfoRedis():
     '''
@@ -94,6 +176,27 @@ def paisInfoMongo(pais):
     for x in mycol.find({},{ "_id": 0, "title": 1, "duration": 1, "type":1 }):
         print(x)
     #escribir los resultados a redis
+    '''
+    db.filming.aggregate([
+    {
+        $lookup:{
+            from:"title",
+            localField:"show_id",
+            foreignField:"show_id",
+            as: "country_info"
+        }
+    },{
+        $match:{
+                country:/Bulgaria/
+        }
+    },{
+        $project:{
+            _id:0,
+            title:"$country_info.title",
+        }
+    }
+    ]);
+    '''
 
 def ratingInfoRedis():
     '''
@@ -126,6 +229,20 @@ def generoInfoMongo(genero):
     for x in mycol.find({},{ "_id": 0, "title": 1, "duration": 1, "type":1 }):
         print(x)
     #escribir los resultados a redis
+    '''
+    db.title.aggregate([
+    {
+        $match:{
+            "listed_in":/International Movies/
+        }
+    },{
+        $project:{
+            _id:0,
+            title:1
+        }
+    }
+    ]); 
+    '''
 
 
 #Aqui va el menu
@@ -135,11 +252,11 @@ while ans != "N":
     print()
     print("What would you like to know today?")
     print("1. Movie info by title")
-    print("2. Actor info by name")
+    print("2. Movies of actor")
     print("3. Director info by name")
     print("4. Titles by year")
     print("5. Titles by country")
-    print("6. Titles by rating")
+    print("6. Rating by title")
     print("7. Titles by genre")
     print("")
 
@@ -157,10 +274,7 @@ while ans != "N":
     elif int(option) == 5:
         country = input("Write the country: ")
     elif int(option) == 6:
-        print("Highest or Lowest ?")
-        print("Highest = H")
-        print("Lowest = L")
-        horl = input("")
+        horl = input("title:")
     elif int(option) == 7:
         genre = input("Write the genre: ")
     else:

@@ -7,7 +7,7 @@ myclient = MongoClient("mongodb://localhost:27017/")
 import re
 
 #mydb = myclient["mydatabase"]
-mydb = myclient["netflix"]
+mydb = myclient["Netflix"]
 #print(myclient.list_database_names())
 
 
@@ -30,6 +30,7 @@ def movieInfoMongo(title):
         pprint(x)
         print()
     #escribir los resultados a redis
+    return
     '''
     db.title.aggregate([
     {
@@ -265,27 +266,15 @@ def generoInfoRedis():
     print(x)'''
 
 
-def generoInfoMongo(genero):
-    #dependiendo del param regresar top ratings mas bajo y mas alto limit cuantos
+def generoInfoMongo(title):
     mycol = mydb["titles"]
     #pensar parametros
-    for x in mycol.find({},{ "_id": 0, "title": 1, "duration": 1, "type":1 }):
-        print(x)
+    print(title)
+    for x in mycol.find({"listed_in": str(title)},{  "_id": 0, "title": 1,"description":1, "duration": 1, "type":1 , "rating": 1, "listed_in":1 }):
+        pprint(x)
+        print()
     #escribir los resultados a redis
-    '''
-    db.title.aggregate([
-    {
-        $match:{
-            "listed_in":/International Movies/
-        }
-    },{
-        $project:{
-            _id:0,
-            title:1
-        }
-    }
-    ]); 
-    '''
+    return
 
 
 #Aqui va el menu
@@ -321,6 +310,7 @@ while ans != "N":
         horl = input("title:")
     elif int(option) == 7:
         genre = input("Write the genre: ")
+        generoInfoMongo(genre)
     else:
         print("Please choose a valid option")
     

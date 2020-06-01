@@ -4,6 +4,7 @@ from pymongo import MongoClient
 from pprint import pprint
 # connect to MongoDB, change the << MONGODB URL >> to reflect your own connection string
 myclient = MongoClient("mongodb://localhost:27017/")
+import re
 
 #mydb = myclient["mydatabase"]
 mydb = myclient["netflix"]
@@ -61,6 +62,34 @@ def actorInfoRedis():
 
 
 def actorInfoMongo(nombreActor):
+    mycol = mydb["filming"]
+    #pensar parametros
+    #print(title)
+    
+    pipeline = [{'$lookup': 
+                {'from' : 'title',
+                 'localField' : 'show_id',
+                 'foreignField' : 'show_id',
+                 'as' : 'year_info'}},{
+        '$match':{
+                'cast':{'$regex':str(nombreActor)}
+        }
+    },{
+        '$project':{
+            '_id':0,
+            'title':"$year_info.title"
+        }
+    }
+
+
+             ]
+
+    #pprint(mydb.runCommand('aggregate', 'filming', pipeline=pipeline))
+    #pprint.pprint(list(mydb.filming.aggregate(pipeline)))
+    cursor = mycol.aggregate(pipeline)
+ # result = 
+    pprint(list(cursor))
+    
     return
     #regresar pelis en que ha estado
     #escribir los resultados a redis
@@ -281,6 +310,7 @@ while ans != "N":
         movieInfoMongo(movie)
     elif int(option) == 2:
         actor = input("Write the name of the actor: ")
+        actorInfoMongo(actor)
     elif int(option) == 3:
         director = input("Write the name of the director: ")
     elif int(option) == 4:

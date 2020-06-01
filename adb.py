@@ -61,27 +61,15 @@ def actorInfoRedis():
      #si no esta llamas actorInfoMongo
 
 
-def actorInfoMongo(nombreActor):
-    mycol = mydb["filming"]
-    pipeline[{
-        '$lookup':{
-            'from':"title",
-            'localField':"show_id",
-            'foreignField':"show_id",
-            'as': "year_info"
-        }
-    },{
-        '$match':{
-                'cast': 'Jandino Asporaat'
-        }
-    },{
-        '$project':{
-            '_id':0,
-            'title':"$year_info.title"
-        }
-    }]
-    print(pipeline)
-    pprint(mycol.aggregate(pipeline))
+def actorInfoMongo(nombreActor):  
+    mycol = mydb["titles"]
+    #pensar parametros
+    #print(title)
+    
+    for x in mycol.find({"cast": nombreActor},{  "_id": 0, "title": 1,"description":1, "duration": 1, "type":1 , "rating": 1, "listed_in":1 }):
+        pprint(x)
+        print()
+
     return
     #regresar pelis en que ha estado
     #escribir los resultados a redis
@@ -290,6 +278,7 @@ while ans != "N":
         movieInfoMongo(movie)
     elif int(option) == 2:
         actor = input("Write the name of the actor: ")
+        actorInfoMongo(actor)
     elif int(option) == 3:
         director = input("Write the name of the director: ")
     elif int(option) == 4:

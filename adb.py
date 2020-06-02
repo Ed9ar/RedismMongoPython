@@ -22,9 +22,9 @@ def movieInfoRedis(conn, title):
         print("NO ESTA EN REDIS VOY A MONGO ")
         print()
         pelis = movieInfoMongo(title)
-        print(pelis)
+        #print(pelis)
         for i in range(len(pelis)):
-            print(pelis[i]["description"])
+            #print(pelis[i]["description"])
             conn.hmset("movie:{}".format(title), {"description": str(pelis[i]["description"]), "duration": str(pelis[i]["duration"]), "type": str(pelis[i]["type"]), "rating": str(pelis[i]["rating"]), "listed_in": str(pelis[i]["listed_in"])})
             conn.sadd("movieList", title)
     print()
@@ -73,7 +73,7 @@ def actorInfoRedis(conn, actor):
             print(ntitle)
             pelis = movieInfoMongo(ntitle)
             for i in range(len(pelis)):
-                print(pelis[i]["description"])
+                #print(pelis[i]["description"])
                 conn.hmset("movie:{}".format(ntitle), {"description": str(pelis[i]["description"]), "duration": str(pelis[i]["duration"]), "type": str(pelis[i]["type"]), "rating": str(pelis[i]["rating"]), "listed_in": str(pelis[i]["listed_in"])})
                 conn.sadd("movieList", ntitle)
             movieActor_list = "moviesActor:{}".format(ntitle)
@@ -133,7 +133,58 @@ def actorInfoMongo(nombreActor):
     return resultado
     #escribir los resultados a redis
 
-def directorInfoRedis():
+def directorInfoRedis(conn, director):
+    if not conn.sismember("directorList", director):
+        conn.hmset("director:{}".format(director), {"name": director})
+        conn.sadd("directorList", director)
+        conn.sadd("moviesDirector:{}".format(director), director)
+        #1.Si no esta llamar a Mongo
+        print()
+        print("NO ESTA EN REDIS VOY A MONGO ")
+        print()
+        directorInfo = directorInfoMongo(director)
+        #print(actor)
+        for i in range(len(directorInfo)):
+            title = str(directorInfo[i]["title"])
+            ntitle = ""
+            for y in range(len(title)-1):
+                if(title[y] != "'" and title[y] != "[" and title[y] != "]"):
+                    ntitle += title[y]
+            print(ntitle)
+            pelis = movieInfoMongo(ntitle)
+            for i in range(len(pelis)):
+                #print(pelis[i]["description"])
+                conn.hmset("movie:{}".format(ntitle), {"description": str(pelis[i]["description"]), "duration": str(pelis[i]["duration"]), "type": str(pelis[i]["type"]), "rating": str(pelis[i]["rating"]), "listed_in": str(pelis[i]["listed_in"])})
+                conn.sadd("movieList", ntitle)
+            movieDirector_list = "moviesDirector:{}".format(ntitle)
+            conn.sadd(movieDirector_list, director)
+            #conn.sadd("moviesActor:{}".format(actor), title)
+            #conn.sadd("moviesActor:{}".format(actor), title)
+            #moviesActor_list = "moviesActor:{}".format(title)
+        #conn.sadd(moviesActor_list, actor)
+      
+    print()
+    print("INFO EN CACHE, MOSTRAR")
+    print()
+    print(director)
+    print("TITLES")
+    print()
+
+    titles = conn.smembers("movieList") 
+    for title in titles:
+        ntitle = ""
+        title = str(title)
+        for x in range(1,len(title)-1):
+            if(title[x] != "'" and title[x] != "[" and title[x] != "]"):
+                ntitle += str(title[x])
+        actor1 = str(conn.smembers("moviesDirector:{}".format(ntitle)))
+        nactor = ""
+        for x in range(2,len(actor1)-1):
+            if(actor1[x] != "'" and actor1[x] != "[" and actor1[x] != "}"):
+                nactor += str(actor1[x])
+
+        if nactor == director:
+            print(ntitle)
     return
     '''
     mycol = mydb["titles"]
@@ -162,12 +213,63 @@ def directorInfoMongo(nombreDirector):
             }
     ]
     cursor = mycol.aggregate(pipeline)
-    pprint(list(cursor))
-    
-    #escribir los resultados a redis
-    return
+    resultado = list(cursor)
 
-def anioInfoRedis():
+    return resultado
+
+def anioInfoRedis(conn,anio):
+    if not conn.sismember("anioList", anio):
+        conn.hmset("anio:{}".format(anio), {"anio": anio})
+        conn.sadd("anioList", anio)
+        conn.sadd("moviesAnio:{}".format(anio), anio)
+        #1.Si no esta llamar a Mongo
+        print()
+        print("NO ESTA EN REDIS VOY A MONGO ")
+        print()
+        directorInfo = anioInfoMongo(anio)
+        #print(actor)
+        for i in range(len(directorInfo)):
+            title = str(directorInfo[i]["title"])
+            ntitle = ""
+            for y in range(len(title)-1):
+                if(title[y] != "'" and title[y] != "[" and title[y] != "]"):
+                    ntitle += title[y]
+            print(ntitle)
+            pelis = movieInfoMongo(ntitle)
+            for i in range(len(pelis)):
+                #print(pelis[i]["description"])
+                conn.hmset("movie:{}".format(ntitle), {"description": str(pelis[i]["description"]), "duration": str(pelis[i]["duration"]), "type": str(pelis[i]["type"]), "rating": str(pelis[i]["rating"]), "listed_in": str(pelis[i]["listed_in"])})
+                conn.sadd("movieList", ntitle)
+            movieAnio_list = "moviesAnio:{}".format(ntitle)
+            conn.sadd(movieAnio_list, anio)
+            #conn.sadd("moviesActor:{}".format(actor), title)
+            #conn.sadd("moviesActor:{}".format(actor), title)
+            #moviesActor_list = "moviesActor:{}".format(title)
+        #conn.sadd(moviesActor_list, actor)
+      
+    print()
+    print("INFO EN CACHE, MOSTRAR")
+    print()
+    print(anio)
+    print("TITLES")
+    print()
+
+    titles = conn.smembers("movieList") 
+    for title in titles:
+        ntitle = ""
+        title = str(title)
+        for x in range(1,len(title)-1):
+            if(title[x] != "'" and title[x] != "[" and title[x] != "]"):
+                ntitle += str(title[x])
+        actor1 = str(conn.smembers("moviesAnio:{}".format(ntitle)))
+        nactor = ""
+        for x in range(2,len(actor1)-1):
+            if(actor1[x] != "'" and actor1[x] != "[" and actor1[x] != "}"):
+                nactor += str(actor1[x])
+
+        if nactor == anio:
+            print(ntitle)
+    return
     '''
     mycol = mydb["titles"]
     #pensar parametros
@@ -195,17 +297,64 @@ def anioInfoMongo(anio):
             }
     ]
     cursor = mycol.aggregate(pipeline)
-    pprint(list(cursor))
-    #escribir los resultados a redis
+    resultado = list(cursor)
+
+    return resultado
+
+
+def paisInfoRedis(conn,pais):
+    if not conn.sismember("paisList", pais):
+        conn.hmset("pais:{}".format(pais), {"country": pais})
+        conn.sadd("paisList", pais)
+        conn.sadd("moviesPais:{}".format(pais), pais)
+        #1.Si no esta llamar a Mongo
+        print()
+        print("NO ESTA EN REDIS VOY A MONGO ")
+        print()
+        directorInfo = paisInfoMongo(pais)
+        #print(actor)
+        for i in range(len(directorInfo)):
+            title = str(directorInfo[i]["title"])
+            ntitle = ""
+            for y in range(len(title)-1):
+                if(title[y] != "'" and title[y] != "[" and title[y] != "]"):
+                    ntitle += title[y]
+            print(ntitle)
+            pelis = movieInfoMongo(ntitle)
+            for i in range(len(pelis)):
+                #print(pelis[i]["description"])
+                conn.hmset("movie:{}".format(ntitle), {"description": str(pelis[i]["description"]), "duration": str(pelis[i]["duration"]), "type": str(pelis[i]["type"]), "rating": str(pelis[i]["rating"]), "listed_in": str(pelis[i]["listed_in"])})
+                conn.sadd("movieList", ntitle)
+            moviePais_list = "moviesPais:{}".format(ntitle)
+            conn.sadd(moviePais_list, pais)
+            #conn.sadd("moviesActor:{}".format(actor), title)
+            #conn.sadd("moviesActor:{}".format(actor), title)
+            #moviesActor_list = "moviesActor:{}".format(title)
+        #conn.sadd(moviesActor_list, actor)
+      
+    print()
+    print("INFO EN CACHE, MOSTRAR")
+    print()
+    print(pais)
+    print("TITLES")
+    print()
+
+    titles = conn.smembers("movieList") 
+    for title in titles:
+        ntitle = ""
+        title = str(title)
+        for x in range(1,len(title)-1):
+            if(title[x] != "'" and title[x] != "[" and title[x] != "]"):
+                ntitle += str(title[x])
+        actor1 = str(conn.smembers("moviesPais:{}".format(ntitle)))
+        nactor = ""
+        for x in range(2,len(actor1)-1):
+            if(actor1[x] != "'" and actor1[x] != "[" and actor1[x] != "}"):
+                nactor += str(actor1[x])
+
+        if nactor == pais:
+            print(ntitle)
     return
-
-
-def paisInfoRedis():
-    '''
-    mycol = mydb["titles"]
-    #pensar parametros
-    for x in mycol.find({},{ "_id": 0, "title": 1, "duration": 1, "type":1 }):
-    print(x)'''
 
 
 def paisInfoMongo(pais):
@@ -227,43 +376,60 @@ def paisInfoMongo(pais):
             }
     ]
     cursor = mycol.aggregate(pipeline)
-    pprint(list(cursor))
-    #escribir los resultados a redis
-    return
+    resultado = list(cursor)
+
+    return resultado
    
 
-def ratingInfoRedis():
-    '''
-    mycol = mydb["titles"]
-    #pensar parametros
-    for x in mycol.find({},{ "_id": 0, "title": 1, "duration": 1, "type":1 }):
-    print(x)'''
+def generoInfoRedis(conn, pais):
+    if not conn.sismember("genreList", pais):
+        conn.hmset("genre:{}".format(pais), {"genre": pais})
+        conn.sadd("genreList", pais)
+        conn.sadd("moviesGenre:{}".format(pais), pais)
+        #1.Si no esta llamar a Mongo
+        print()
+        print("NO ESTA EN REDIS VOY A MONGO ")
+        print()
+        directorInfo = generoInfoMongo(pais)
+        #print(actor)
+        for i in range(len(directorInfo)):
+            title = str(directorInfo[i]["title"])
+            ntitle = ""
+            for y in range(len(title)-1):
+                if(title[y] != "'" and title[y] != "[" and title[y] != "]"):
+                    ntitle += title[y]
+            print(ntitle)
+            pelis = movieInfoMongo(ntitle)
+            for i in range(len(pelis)):
+            #print(pelis[i]["description"])
+                conn.hmset("movie:{}".format(title), {"description": str(pelis[i]["description"]), "duration": str(pelis[i]["duration"]), "type": str(pelis[i]["type"]), "rating": str(pelis[i]["rating"]), "listed_in": str(pelis[i]["listed_in"])})
+                conn.sadd("movieList", title)
+            movieGenre_list = "moviesGenre:{}".format(ntitle)
+            conn.sadd(movieGenre_list, pais)
+      
+    print()
+    print("INFO EN CACHE, MOSTRAR")
+    print()
+    print(pais)
+    print("TITLES")
+    print()
 
+    titles = conn.smembers("movieList") 
+    for title in titles:
+        ntitle = ""
+        title = str(title)
+        for x in range(1,len(title)-1):
+            if(title[x] != "'" and title[x] != "[" and title[x] != "]"):
+                ntitle += str(title[x])
+        actor1 = str(conn.smembers("moviesGenre:{}".format(ntitle)))
+        nactor = ""
+        for x in range(2,len(actor1)-1):
+            if(actor1[x] != "'" and actor1[x] != "[" and actor1[x] != "}"):
+                nactor += str(actor1[x])
 
-def ratingInfoMongo(title):
-    mycol = mydb["title"]
-    
-    pipeline = [{'$match':{
-                        'title':str(title)
-                }
-                },{
-                '$project':{
-                    '_id':0,
-                    'rating':1
-                }
-            }
-    ]
-    cursor = mycol.aggregate(pipeline)
-    pprint(list(cursor))
-    #escribir los resultados a redis
+        if nactor == pais:
+            print(ntitle)
     return
-
-def generoInfoRedis():
-    '''
-    mycol = mydb["titles"]
-    #pensar parametros
-    for x in mycol.find({},{ "_id": 0, "title": 1, "duration": 1, "type":1 }):
-    print(x)'''
 
 
 def generoInfoMongo(genre):
@@ -281,9 +447,9 @@ def generoInfoMongo(genre):
             }
     ]
     cursor = mycol.aggregate(pipeline)
-    pprint(list(cursor))
-    #escribir los resultados a redis
-    return
+    resultado = list(cursor)
+
+    return resultado
 
 
 #Aqui va el menu
@@ -295,11 +461,10 @@ while ans != "N":
     print("What would you like to know today?")
     print("1. Movie info by title")
     print("2. Movies of actor")
-    print("3. Director info by name")
+    print("3. Movies by director")
     print("4. Titles by year")
     print("5. Titles by country")
-    print("6. Rating by title")
-    print("7. Titles by genre")
+    print("6. Titles by genre")
     print("")
 
     option = input("Write the number of your choice: ")
@@ -320,9 +485,6 @@ while ans != "N":
         country = input("Write the country: ")
         paisInfoRedis(conn, country)
     elif int(option) == 6:
-        rating = input("Write the title:")
-        ratingInfoRedis(conn, rating)
-    elif int(option) == 7:
         genre = input("Write the genre: ")
         generoInfoRedis(conn, genre)
     else:

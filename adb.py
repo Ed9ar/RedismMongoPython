@@ -24,33 +24,10 @@ def movieInfoRedis(title):
 #PARAM QUE QUIERES SABER
 def movieInfoMongo(title):
     mycol = mydb["titles"]
-    #pensar parametros
-    print(title)
     for x in mycol.find({"title": str(title)},{  "_id": 0, "title": 1,"description":1, "duration": 1, "type":1 , "rating": 1, "listed_in":1 }):
         pprint(x)
-        print()
     #escribir los resultados a redis
     return
-    '''
-    db.title.aggregate([
-    {
-        $lookup:{
-            from:"filming",
-            localField:"show_id",
-            foreignField:"show_id",
-            as: "year_info"
-        }
-    },{
-        $match:{
-            "title":"Jandino: Whatever it Takes"
-        }
-    },{
-        $project:{
-            _id:0
-        }
-    }
-    ]);
-    '''
 
 def actorInfoRedis():
     return
@@ -64,56 +41,27 @@ def actorInfoRedis():
 
 def actorInfoMongo(nombreActor):
     mycol = mydb["filming"]
-    #pensar parametros
-    #print(title)
     
     pipeline = [{'$lookup': 
                 {'from' : 'title',
                  'localField' : 'show_id',
                  'foreignField' : 'show_id',
                  'as' : 'year_info'}},{
-        '$match':{
-                'cast':{'$regex':str(nombreActor)}
-        }
-    },{
-        '$project':{
-            '_id':0,
-            'title':"$year_info.title"
-        }
-    }
-
-
-             ]
-
-    #pprint(mydb.runCommand('aggregate', 'filming', pipeline=pipeline))
-    #pprint.pprint(list(mydb.filming.aggregate(pipeline)))
+                '$match':{
+                        'cast':{'$regex':str(nombreActor)}
+                }
+                },{
+                '$project':{
+                    '_id':0,
+                    'title':"$year_info.title"
+                }
+            }
+    ]
     cursor = mycol.aggregate(pipeline)
- # result = 
     pprint(list(cursor))
     
     return
-    #regresar pelis en que ha estado
     #escribir los resultados a redis
-    '''
-    db.filming.aggregate([
-    {
-        $lookup:{
-            from:"title",
-            localField:"show_id",
-            foreignField:"show_id",
-            as: "year_info"
-        }
-    },{
-        $match:{
-                cast:/Jandino Asporaat/
-        }
-    },{
-        $project:{
-            _id:0,
-            title:"$year_info.title"
-        }
-    }
-    ]);'''
 
 def directorInfoRedis():
     return
@@ -126,33 +74,28 @@ def directorInfoRedis():
 
 
 def directorInfoMongo(nombreDirector):
-    #regresar pelis que ha dirigido
-    mycol = mydb["titles"]
-    #pensar parametros
-    for x in mycol.find({},{ "_id": 0, "title": 1, "duration": 1, "type":1 }):
-        print(x)
+    mycol = mydb["filming"]
+    
+    pipeline = [{'$lookup': 
+                {'from' : 'title',
+                 'localField' : 'show_id',
+                 'foreignField' : 'show_id',
+                 'as' : 'director_info'}},{
+                '$match':{
+                        'director':{'$regex':str(nombreDirector)}
+                }
+                },{
+                '$project':{
+                    '_id':0,
+                    'title':"$director_info.title"
+                }
+            }
+    ]
+    cursor = mycol.aggregate(pipeline)
+    pprint(list(cursor))
+    
     #escribir los resultados a redis
-    '''
-    db.filming.aggregate([
-    {
-        $lookup:{
-            from:"title",
-            localField:"show_id",
-            foreignField:"show_id",
-            as: "director_info"
-        }
-    },{
-        $match:{
-                director:/Tilak Shetty/
-        }
-    },{
-        $project:{
-            _id:0,
-            title:"$director_info.title"
-        }
-    }
-    ]);
-    '''
+    return
 
 def anioInfoRedis():
     '''
@@ -163,33 +106,29 @@ def anioInfoRedis():
 
 
 def anioInfoMongo(anio):
-    #regresar pelis de ese anio
-    mycol = mydb["titles"]
-    #pensar parametros
-    for x in mycol.find({},{ "_id": 0, "title": 1, "duration": 1, "type":1 }):
-        print(x)
+
+    mycol = mydb["filming"]
+    
+    pipeline = [{'$lookup': 
+                {'from' : 'title',
+                 'localField' : 'show_id',
+                 'foreignField' : 'show_id',
+                 'as' : 'year_info'}},{
+                '$match':{
+                        'release_year':{'$regex':str(anio)}
+                }
+                },{
+                '$project':{
+                    '_id':0,
+                    'title':"$year_info.title"
+                }
+            }
+    ]
+    cursor = mycol.aggregate(pipeline)
+    pprint(list(cursor))
     #escribir los resultados a redis
-    '''
-    db.filming.aggregate([
-    {
-        $lookup:{
-            from:"title",
-            localField:"show_id",
-            foreignField:"show_id",
-            as: "release_year_info"
-        }
-    },{
-        $match:{
-                release_year:/2016/
-        }
-    },{
-        $project:{
-            _id:0,
-            title:"$release_year_info.title"
-        }
-    }
-    ]); 
-    '''
+    return
+
 
 def paisInfoRedis():
     '''
@@ -200,33 +139,28 @@ def paisInfoRedis():
 
 
 def paisInfoMongo(pais):
-    #regresar pelis de ese pais
-    mycol = mydb["titles"]
-    #pensar parametros
-    for x in mycol.find({},{ "_id": 0, "title": 1, "duration": 1, "type":1 }):
-        print(x)
+    mycol = mydb["filming"]
+    
+    pipeline = [{'$lookup': 
+                {'from' : 'title',
+                 'localField' : 'show_id',
+                 'foreignField' : 'show_id',
+                 'as' : 'country_info'}},{
+                '$match':{
+                        'country':{'$regex':str(pais)}
+                }
+                },{
+                '$project':{
+                    '_id':0,
+                    'title':"$country_info.title"
+                }
+            }
+    ]
+    cursor = mycol.aggregate(pipeline)
+    pprint(list(cursor))
     #escribir los resultados a redis
-    '''
-    db.filming.aggregate([
-    {
-        $lookup:{
-            from:"title",
-            localField:"show_id",
-            foreignField:"show_id",
-            as: "country_info"
-        }
-    },{
-        $match:{
-                country:/Bulgaria/
-        }
-    },{
-        $project:{
-            _id:0,
-            title:"$country_info.title",
-        }
-    }
-    ]);
-    '''
+    return
+   
 
 def ratingInfoRedis():
     '''
@@ -236,27 +170,23 @@ def ratingInfoRedis():
     print(x)'''
 
 
-def ratingInfoMongo(bajoOalto, cuantos):
-    #dependiendo del param regresar top ratings mas bajo y mas alto limit cuantos
-    mycol = mydb["titles"]
-    #pensar parametros
-    for x in mycol.find({},{ "_id": 0, "title": 1, "duration": 1, "type":1 }):
-        print(x)
+def ratingInfoMongo(title):
+    mycol = mydb["title"]
+    
+    pipeline = [{'$match':{
+                        'title':str(title)
+                }
+                },{
+                '$project':{
+                    '_id':0,
+                    'rating':1
+                }
+            }
+    ]
+    cursor = mycol.aggregate(pipeline)
+    pprint(list(cursor))
     #escribir los resultados a redis
-    '''
-    db.title.aggregate([
-    {
-        $match:{
-            "title":/Norm of the North: King Sized Adventure/
-        }
-    },{
-        $project:{
-            _id:0,
-            rating:1
-        }
-    }
-    ]); 
-    '''
+    return
 
 def generoInfoRedis():
     '''
@@ -266,13 +196,22 @@ def generoInfoRedis():
     print(x)'''
 
 
-def generoInfoMongo(title):
-    mycol = mydb["titles"]
-    #pensar parametros
-    print(title)
-    for x in mycol.find({"listed_in": str(title)},{  "_id": 0, "title": 1,"description":1, "duration": 1, "type":1 , "rating": 1, "listed_in":1 }):
-        pprint(x)
-        print()
+def generoInfoMongo(genre):
+    
+    mycol = mydb["title"]
+    
+    pipeline = [{'$match':{
+                        'listed_in':str(genre)
+                }
+                },{
+                '$project':{
+                    '_id':0,
+                    'title':1
+                }
+            }
+    ]
+    cursor = mycol.aggregate(pipeline)
+    pprint(list(cursor))
     #escribir los resultados a redis
     return
 
@@ -302,12 +241,16 @@ while ans != "N":
         actorInfoMongo(actor)
     elif int(option) == 3:
         director = input("Write the name of the director: ")
+        directorInfoMongo(director)
     elif int(option) == 4:
         year = input("Write the year: ")
+        anioInfoMongo(year)
     elif int(option) == 5:
         country = input("Write the country: ")
+        paisInfoMongo(country)
     elif int(option) == 6:
-        horl = input("title:")
+        rating = input("Write the title:")
+        ratingInfoMongo(rating)
     elif int(option) == 7:
         genre = input("Write the genre: ")
         generoInfoMongo(genre)

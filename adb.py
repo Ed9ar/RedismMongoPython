@@ -381,36 +381,32 @@ def paisInfoMongo(pais):
     return resultado
    
 
-def generoInfoRedis(conn, pais):
-    if not conn.sismember("genreList", pais):
-        conn.hmset("genre:{}".format(pais), {"genre": pais})
-        conn.sadd("genreList", pais)
-        conn.sadd("moviesGenre:{}".format(pais), pais)
+def generoInfoRedis(conn, genre):
+    if not conn.sismember("genreList", genre):
+        conn.hmset("genre:{}".format(genre), {"genre": genre})
+        conn.sadd("genreList", genre)
+        conn.sadd("moviesGenre:{}".format(genre), genre)
         #1.Si no esta llamar a Mongo
         print()
         print("NO ESTA EN REDIS VOY A MONGO ")
         print()
-        directorInfo = generoInfoMongo(pais)
+        generoInfo = generoInfoMongo(genre)
+
         #print(actor)
-        for i in range(len(directorInfo)):
-            title = str(directorInfo[i]["title"])
-            ntitle = ""
-            for y in range(len(title)-1):
-                if(title[y] != "'" and title[y] != "[" and title[y] != "]"):
-                    ntitle += title[y]
-            print(ntitle)
-            pelis = movieInfoMongo(ntitle)
+        for i in range(len(generoInfo)):
+            title = str(generoInfo[i]["title"])
+            pelis = movieInfoMongo(title)
             for i in range(len(pelis)):
             #print(pelis[i]["description"])
                 conn.hmset("movie:{}".format(title), {"description": str(pelis[i]["description"]), "duration": str(pelis[i]["duration"]), "type": str(pelis[i]["type"]), "rating": str(pelis[i]["rating"]), "listed_in": str(pelis[i]["listed_in"])})
                 conn.sadd("movieList", title)
-            movieGenre_list = "moviesGenre:{}".format(ntitle)
-            conn.sadd(movieGenre_list, pais)
+            movieGenre_list = "moviesGenre:{}".format(title)
+            conn.sadd(movieGenre_list, genre)
       
     print()
     print("INFO EN CACHE, MOSTRAR")
     print()
-    print(pais)
+    print(genre)
     print("TITLES")
     print()
 
@@ -427,7 +423,7 @@ def generoInfoRedis(conn, pais):
             if(actor1[x] != "'" and actor1[x] != "[" and actor1[x] != "}"):
                 nactor += str(actor1[x])
 
-        if nactor == pais:
+        if nactor == genre:
             print(ntitle)
     return
 
